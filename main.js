@@ -55,6 +55,14 @@ sync(function(result){
 /////////////////////////
 //program that calculates disposable income
 
+
+//an example of asynchronous with steps by using timeout functions
+/** First we give it a function of callback but when it get salary you also
+give it a callback which calls subtract tax which calls subtract rent using the
+value it just found which finally gives back to getdisposable and prints **/
+
+
+//This promise is kinda confusing because of the layer deep it goes into
 function getSalary(callback) {
     setTimeout(() => {
       callback(33000);
@@ -73,10 +81,10 @@ function subtractRent(salary, callback) {
   }, 1000);
 }
 
-function getDisposableIncome() {
-    getSalary(salary1 =>{
+function getDisposableIncome(callback) {
+    getSalary(salary1 => {
       subtractTax(salary1, salary2 =>{
-        subtraactRent(salary2, salary3 =>{
+        subtractRent(salary2, salary3 =>{
           callback(salary3);
         });
       });
@@ -86,3 +94,64 @@ function getDisposableIncome() {
 getDisposableIncome(disposableincome =>{
   console.log(disposableincome);
 })
+
+
+//////REFACTORING GET DISPOSABLE INCOME BY USING PROMISES////
+/////////////////////////////////////////////////////////////
+
+function getSalary() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(33000);
+      }, 1000);
+    });
+}
+
+const promise = getSalary();
+promise.then(salary => {
+  console.log(salary);
+});
+////// that is also the same as below /////
+//after returning the promise and then using then to do the rest with the value
+
+getSalary().then(salary =>{
+  console.log(salary);
+})
+
+function subtractTax(salary) {
+    return new Promise (resolve =>{
+      setTimeout(() =>{
+        resolve(salary * 0.75);
+      }, 1000);
+    });
+}
+
+function subtractRent(salary) {
+  return new Promise(resolve =>{
+    setTimeout(() =>{
+      resolve(salary - 5000);
+    }, 1000);
+  });
+}
+
+//all of these just chain up events to handle in promises
+//asynchronous turned into synchronous events
+function getDisposableIncome(callback) {
+    const salaryPromise = getSalary();
+    const taxPromise = salaryPromise.then(salary1 =>{
+      return subtractTax(salary1);
+    });
+    const rentPromise = taxPromise.then(salary2 =>{
+      return subtractRent(salary2);
+    });
+    return rentPromise;
+}
+
+getDisposableIncome().then(disposable =>{
+  console.log(disposable);
+});
+
+///you can write this all nicer/////
+function getDisposableIncome(callback) {
+    return getSalary().then(subtractTax).then(subtractRent);
+}
