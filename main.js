@@ -155,3 +155,32 @@ getDisposableIncome().then(disposable =>{
 function getDisposableIncome(callback) {
     return getSalary().then(subtractTax).then(subtractRent);
 }
+
+
+/////////USING PROMISE ALL//////////
+///////////////////////////////////
+
+function getSalary1() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(33000);
+      }, 1000);
+    });
+}
+
+function getSalary2() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(450000);
+      }, 1000);
+    });
+}
+
+function getSalarySum(){
+  return Promise.all([
+    getSalary1(),
+    getSalary2(),
+  ]).then(salaries =>{
+    return salaries.reduce((prev,cur) => prev + cur, 0);
+  })
+}
